@@ -1,20 +1,44 @@
-import { serve } from '@hono/node-server';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
-import { db, initDb } from './db.js';
+import { createClient } from '@libsql/client/web';
 
 const app = new Hono();
 app.use('/*', cors());
 
-// Init DB
-initDb();
+// Helper to get db instance per request
+const getDb = (env) => {
+    return createClient({
+        url: env.TURSO_DATABASE_URL,
+        authToken: env.TURSO_AUTH_TOKEN
+    });
+};
 
 // Random ID generator
 const generateId = () => 'usr_' + Math.random().toString(36).substring(7);
 
+// Setup Endpoint (Run this once to create the table)
+app.get('/api/setup', async (c) => {
+    const db = getDb(c.env);
+    try {
+        await db.execute(`
+            CREATE TABLE IF NOT EXISTS users (
+                id TEXT PRIMARY KEY,
+                name TEXT NOT NULL,
+                email TEXT UNIQUE NOT NULL,
+                password TEXT NOT NULL
+            )
+        `);
+        return c.json({ message: "Database table initialized successfully." });
+    } catch (error) {
+        console.error("Setup error:", error);
+        return c.json({ error: "Failed to setup database." }, 500);
+    }
+});
+
 // Login Endpoint
 app.post('/api/auth/login', async (c) => {
     const { email, password } = await c.req.json();
+    const db = getDb(c.env);
     
     try {
         const result = await db.execute({
@@ -42,6 +66,7 @@ app.post('/api/auth/register', async (c) => {
     }
 
     const id = generateId();
+    const db = getDb(c.env);
 
     try {
         await db.execute({
@@ -60,10 +85,4 @@ app.post('/api/auth/register', async (c) => {
     }
 });
 
-const PORT = process.env.PORT || 3000;
-console.log(`BlackMirror Backend (Hono Edge-Ready) running on http://localhost:${PORT}`);
-
-serve({
-  fetch: app.fetch,
-  port: PORT
-});
+export default app;

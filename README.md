@@ -39,13 +39,17 @@ node index.js
 ```
 The API will run on `http://localhost:3000`.
 
-### 2. Setup the Frontend
+### 2. Setup the Frontend (Development)
 Open a new terminal at the root of the project:
 ```bash
 npm install
 npm run dev
 ```
-The React application will run on `http://localhost:5173` and automatically proxy `/api` requests to your Express backend.
+The React application will run on `http://localhost:5173` and automatically proxy `/api` requests to your local Wrangler emulator (`http://localhost:8787`).
+
+### 3. Frontend Production Deployment (Vercel/Pages)
+When deploying the frontend to a production host like Vercel or Cloudflare Pages, you must set an environment variable so the app knows where your production Cloudflare Worker is located:
+- `VITE_API_URL=https://blackmirror-api.<your-username>.workers.dev`
 
 ## 📂 Project Structure
 
