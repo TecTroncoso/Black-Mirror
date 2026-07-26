@@ -20,14 +20,13 @@ dist-ssr
 *.suo
 *.ntvs*
 *.njsproj
-*.sln
-*.sw?
-
-# Backend (Express)
+# Backend (Express / Hono)
 server/node_modules
 server/.env
+server/.dev.vars
 server/*.db
 server/*.db-journal
+server/.wrangler/
 
 # Python & IDE
 venv/
