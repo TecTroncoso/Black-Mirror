@@ -1,10 +1,10 @@
-import express from 'express';
-import cors from 'cors';
+import { serve } from '@hono/node-server';
+import { Hono } from 'hono';
+import { cors } from 'hono/cors';
 import { db, initDb } from './db.js';
 
-const app = express();
-app.use(cors());
-app.use(express.json());
+const app = new Hono();
+app.use('/*', cors());
 
 // Init DB
 initDb();
@@ -13,8 +13,8 @@ initDb();
 const generateId = () => 'usr_' + Math.random().toString(36).substring(7);
 
 // Login Endpoint
-app.post('/api/auth/login', async (req, res) => {
-    const { email, password } = req.body;
+app.post('/api/auth/login', async (c) => {
+    const { email, password } = await c.req.json();
     
     try {
         const result = await db.execute({
@@ -23,23 +23,22 @@ app.post('/api/auth/login', async (req, res) => {
         });
 
         if (result.rows.length > 0) {
-            // Return user without password
-            res.json(result.rows[0]);
+            return c.json(result.rows[0]);
         } else {
-            res.status(401).json({ error: "Invalid credentials" });
+            return c.json({ error: "Invalid credentials" }, 401);
         }
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: "Database error" });
+        return c.json({ error: "Database error" }, 500);
     }
 });
 
 // Register Endpoint
-app.post('/api/auth/register', async (req, res) => {
-    const { name, email, password } = req.body;
+app.post('/api/auth/register', async (c) => {
+    const { name, email, password } = await c.req.json();
 
     if (!email || !email.includes('@') || !password || password.length < 4) {
-        return res.status(400).json({ error: 'Invalid email or password too short.' });
+        return c.json({ error: 'Invalid email or password too short.' }, 400);
     }
 
     const id = generateId();
@@ -50,18 +49,21 @@ app.post('/api/auth/register', async (req, res) => {
             args: [id, name, email, password]
         });
         
-        res.json({ id, name, email });
+        return c.json({ id, name, email });
     } catch (error) {
         console.error(error);
         if (error.message.includes('UNIQUE constraint failed')) {
-            res.status(409).json({ error: "Email already registered" });
+            return c.json({ error: "Email already registered" }, 409);
         } else {
-            res.status(500).json({ error: "Database error" });
+            return c.json({ error: "Database error" }, 500);
         }
     }
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`BlackMirror Backend running on http://localhost:${PORT}`);
+console.log(`BlackMirror Backend (Hono Edge-Ready) running on http://localhost:${PORT}`);
+
+serve({
+  fetch: app.fetch,
+  port: PORT
 });

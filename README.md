@@ -13,7 +13,7 @@ Black Mirror is a futuristic, TV-inspired full-stack application featuring a sle
 ## 🛠️ Tech Stack
 
 - **Frontend:** React 19 (TypeScript), Vite, Tailwind CSS v4, Lucide React
-- **Backend:** Node.js, Express
+- **Backend:** Hono.js (Node Adapter for local dev, 100% Cloudflare Workers compatible)
 - **Database:** Turso (SQLite on the Edge) via `@libsql/client`
 
 ## 🚀 Run Locally
