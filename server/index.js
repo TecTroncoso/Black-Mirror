@@ -16,10 +16,11 @@ const getDb = (env) => {
 // Random ID generator
 const generateId = () => 'usr_' + Math.random().toString(36).substring(7);
 
-// Setup Endpoint (Run this once to create the table)
+// Setup Endpoint (Run this once to create/migrate the tables)
 app.get('/api/setup', async (c) => {
     const db = getDb(c.env);
     try {
+        // Users table
         await db.execute(`
             CREATE TABLE IF NOT EXISTS users (
                 id TEXT PRIMARY KEY,
@@ -28,12 +29,39 @@ app.get('/api/setup', async (c) => {
                 password TEXT NOT NULL
             )
         `);
-        return c.json({ message: "Database table initialized successfully." });
+
+        // New Universal Content table
+        await db.execute(`
+            CREATE TABLE IF NOT EXISTS content (
+                slug TEXT PRIMARY KEY,
+                content_type TEXT NOT NULL,
+                title TEXT NOT NULL,
+                poster TEXT,
+                total_episodes INTEGER DEFAULT 1,
+                details TEXT NOT NULL
+            )
+        `);
+
+        // Drop old tables
+        const oldTables = ['animes', 'anime_generos', 'capitulos', 'proveedores'];
+        for (const table of oldTables) {
+            try {
+                await db.execute(`DROP TABLE IF EXISTS ${table}`);
+            } catch (e) {
+                // Ignore errors
+            }
+        }
+
+        return c.json({ message: "Database updated to Universal Content architecture successfully." });
     } catch (error) {
         console.error("Setup error:", error);
         return c.json({ error: "Failed to setup database." }, 500);
     }
 });
+
+// ============================================================
+// AUTH ENDPOINTS
+// ============================================================
 
 // Login Endpoint
 app.post('/api/auth/login', async (c) => {
@@ -82,6 +110,74 @@ app.post('/api/auth/register', async (c) => {
         } else {
             return c.json({ error: "Database error" }, 500);
         }
+    }
+});
+
+// ============================================================
+// CONTENT ENDPOINTS
+// ============================================================
+
+// Get all content by type (for grids)
+app.get('/api/content/:type', async (c) => {
+    const contentType = c.req.param('type');
+    const validTypes = ['movie', 'series', 'anime', 'adult_anime'];
+
+    if (!validTypes.includes(contentType)) {
+        return c.json({ error: 'Invalid content type' }, 400);
+    }
+
+    const db = getDb(c.env);
+
+    try {
+        const result = await db.execute({
+            sql: `SELECT slug, title as titulo, poster as portada, total_episodes as capitulos_total
+                  FROM content
+                  WHERE content_type = ?
+                  ORDER BY title ASC`,
+            args: [contentType]
+        });
+
+        const items = result.rows.map(row => ({
+            slug: row.slug,
+            titulo: row.titulo,
+            portada: row.portada,
+            capitulos_total: row.capitulos_total
+        }));
+
+        return c.json(items);
+    } catch (error) {
+        console.error(error);
+        return c.json({ error: "Database error" }, 500);
+    }
+});
+
+// Get full detail of a content item (for viewing)
+app.get('/api/content/:type/:slug', async (c) => {
+    const contentType = c.req.param('type');
+    const slug = c.req.param('slug');
+    const db = getDb(c.env);
+
+    try {
+        const rs = await db.execute({
+            sql: "SELECT details FROM content WHERE slug = ? AND content_type = ?",
+            args: [slug, contentType]
+        });
+
+        if (rs.rows.length === 0) {
+            return c.json({ error: "Content not found" }, 404);
+        }
+
+        // Parse the stored JSON details
+        const detailsStr = rs.rows[0].details;
+        const item = typeof detailsStr === 'string' ? JSON.parse(detailsStr) : detailsStr;
+
+        // Ensure content_type is injected into the response for consistency
+        item.content_type = contentType;
+        
+        return c.json(item);
+    } catch (error) {
+        console.error(error);
+        return c.json({ error: "Database error" }, 500);
     }
 });
 

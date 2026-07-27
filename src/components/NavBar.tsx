@@ -1,18 +1,21 @@
 import React from 'react';
-import { Search, Home, Tv, Film, Settings, User } from 'lucide-react';
+import { Search, Home, Tv, Film, Clapperboard, Swords, ShieldAlert, Settings, User } from 'lucide-react';
 import { AppView } from '../types';
 
 interface NavBarProps {
   currentView: AppView;
   setView: (view: AppView) => void;
+  adultContentEnabled?: boolean;
 }
 
-export const NavBar: React.FC<NavBarProps> = ({ currentView, setView }) => {
+export const NavBar: React.FC<NavBarProps> = ({ currentView, setView, adultContentEnabled = false }) => {
   const navItems = [
     { id: AppView.SEARCH, icon: Search, label: 'Search' },
     { id: AppView.HOME, icon: Home, label: 'Home' },
-    { id: AppView.LIVE, icon: Tv, label: 'Live' },
-    { id: AppView.VOD, icon: Film, label: 'VOD' },
+    { id: AppView.MOVIES, icon: Clapperboard, label: 'Movies' },
+    { id: AppView.SERIES, icon: Tv, label: 'Series' },
+    { id: AppView.ANIME, icon: Swords, label: 'Anime' },
+    ...(adultContentEnabled ? [{ id: AppView.ADULT_ANIME, icon: ShieldAlert, label: 'Adult' }] : []),
     { id: AppView.SETTINGS, icon: Settings, label: 'Settings' },
   ];
 
@@ -26,7 +29,7 @@ export const NavBar: React.FC<NavBarProps> = ({ currentView, setView }) => {
           <User size={20} className="text-white" />
         </div>
         
-        <div className="flex-1 flex flex-row md:flex-col space-x-6 md:space-x-0 md:space-y-8 w-full items-center justify-around md:justify-center h-full">
+        <div className="flex-1 flex flex-row md:flex-col space-x-4 md:space-x-0 md:space-y-6 w-full items-center justify-around md:justify-center h-full">
           {navItems.map((item) => {
             const isActive = currentView === item.id;
             return (
@@ -46,7 +49,7 @@ export const NavBar: React.FC<NavBarProps> = ({ currentView, setView }) => {
                 )}
                 
                 <item.icon 
-                  size={24} 
+                  size={22} 
                   strokeWidth={isActive ? 2.5 : 2} 
                   className={`transition-all duration-300 ${isActive ? 'drop-shadow-[0_0_8px_rgba(59,130,246,0.8)]' : ''}`}
                 />
@@ -69,7 +72,7 @@ export const NavBar: React.FC<NavBarProps> = ({ currentView, setView }) => {
         </div>
         
         <div className="hidden md:block mt-auto text-[10px] text-tv-muted font-mono tracking-widest opacity-30 rotate-90 mb-4 origin-center">
-          V3.0
+          V4.0
         </div>
       </div>
     </div>

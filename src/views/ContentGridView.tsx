@@ -1,0 +1,137 @@
+import React, { useState, useEffect } from 'react';
+import { ContentItem, ContentType } from '../types';
+import { Loader2, Play, Search } from 'lucide-react';
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || '';
+
+interface ContentGridViewProps {
+    contentType: ContentType;
+    title: string;
+}
+
+const CONTENT_LABELS: Record<ContentType, string> = {
+    movie: 'Movies',
+    series: 'Series',
+    anime: 'Anime',
+    adult_anime: 'Adult Anime',
+};
+
+export const ContentGridView: React.FC<ContentGridViewProps> = ({ contentType, title }) => {
+    const [items, setItems] = useState<ContentItem[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [searchQuery, setSearchQuery] = useState('');
+
+    useEffect(() => {
+        const fetchContent = async () => {
+            setLoading(true);
+            setError(null);
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/content/${contentType}`);
+                if (!response.ok) throw new Error('Failed to fetch content');
+                const data = await response.json();
+                setItems(data);
+            } catch (err: any) {
+                setError(err.message);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchContent();
+    }, [contentType]);
+
+    const filtered = items.filter(item =>
+        item.titulo.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center h-64">
+                <Loader2 className="w-8 h-8 text-tv-focus animate-spin" />
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="flex items-center justify-center h-64">
+                <p className="text-red-400 text-sm">Error: {error}</p>
+            </div>
+        );
+    }
+
+    return (
+        <div className="space-y-6">
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div>
+                    <h1 className="text-2xl md:text-3xl font-bold text-white tracking-tight">{title}</h1>
+                    <p className="text-sm text-gray-400 mt-1">{items.length} titles available</p>
+                </div>
+                {/* Search */}
+                <div className="relative w-full sm:w-72">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                    <input
+                        type="text"
+                        placeholder={`Search ${CONTENT_LABELS[contentType]}...`}
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full pl-10 pr-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-tv-focus/50 focus:ring-1 focus:ring-tv-focus/30 transition-all"
+                    />
+                </div>
+            </div>
+
+            {/* Grid */}
+            {filtered.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-48 text-gray-500">
+                    <p className="text-lg font-medium">No content found</p>
+                    <p className="text-sm mt-1">
+                        {items.length === 0 ? 'This category is empty. Run the scraper to populate it.' : 'Try a different search term.'}
+                    </p>
+                </div>
+            ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+                    {filtered.map((item) => (
+                        <ContentCard key={item.slug} item={item} />
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+};
+
+const ContentCard: React.FC<{ item: ContentItem }> = ({ item }) => {
+    return (
+        <button className="group relative flex flex-col rounded-2xl overflow-hidden bg-white/5 border border-white/5 hover:border-tv-focus/30 transition-all duration-300 hover:scale-[1.03] hover:shadow-[0_0_20px_rgba(59,130,246,0.15)] text-left">
+            {/* Poster */}
+            <div className="relative aspect-[2/3] w-full overflow-hidden">
+                {item.portada ? (
+                    <img
+                        src={item.portada}
+                        alt={item.titulo}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        loading="lazy"
+                    />
+                ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center">
+                        <Play className="w-10 h-10 text-gray-600" />
+                    </div>
+                )}
+                {/* Hover Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-3">
+                    <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-full bg-tv-focus/90 flex items-center justify-center shadow-lg">
+                            <Play className="w-4 h-4 text-white fill-white" />
+                        </div>
+                        <span className="text-xs text-white font-medium">{item.capitulos_total} eps</span>
+                    </div>
+                </div>
+            </div>
+            {/* Info */}
+            <div className="p-3 space-y-1">
+                <h3 className="text-sm font-semibold text-white truncate group-hover:text-tv-focus transition-colors">{item.titulo}</h3>
+                <p className="text-xs text-gray-500">{item.capitulos_total} episodes</p>
+            </div>
+        </button>
+    );
+};

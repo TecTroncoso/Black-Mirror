@@ -31,3 +31,11 @@ server/.wrangler/
 # Python & IDE
 venv/
 .atl/
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environments
+.env
+.env.*
+*.env
