@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { ContentItem, ContentType } from '../types';
+import React, { useState } from 'react';
+import { ContentItem, ContentType } from '../../core/domain/models';
+import { useContent } from '../../core/useCases/useContent';
 import { Loader2, Play, Search } from 'lucide-react';
-
-const API_BASE_URL = import.meta.env.VITE_API_URL || '';
 
 interface ContentGridViewProps {
     contentType: ContentType;
@@ -17,28 +16,8 @@ const CONTENT_LABELS: Record<ContentType, string> = {
 };
 
 export const ContentGridView: React.FC<ContentGridViewProps> = ({ contentType, title }) => {
-    const [items, setItems] = useState<ContentItem[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    const { items, loading, error } = useContent(contentType);
     const [searchQuery, setSearchQuery] = useState('');
-
-    useEffect(() => {
-        const fetchContent = async () => {
-            setLoading(true);
-            setError(null);
-            try {
-                const response = await fetch(`${API_BASE_URL}/api/content/${contentType}`);
-                if (!response.ok) throw new Error('Failed to fetch content');
-                const data = await response.json();
-                setItems(data);
-            } catch (err: any) {
-                setError(err.message);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchContent();
-    }, [contentType]);
 
     const filtered = items.filter(item =>
         item.titulo.toLowerCase().includes(searchQuery.toLowerCase())

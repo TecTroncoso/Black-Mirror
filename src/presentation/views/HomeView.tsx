@@ -1,7 +1,7 @@
 import React from 'react';
 import { StatusCard } from '../components/StatusCard';
 import { ModuleList } from '../components/ModuleList';
-import { Module } from '../types';
+import { Module } from '../../core/domain/models';
 
 interface HomeViewProps {
   isConnected: boolean;

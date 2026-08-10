@@ -38,10 +38,15 @@ Black Mirror is a futuristic, TV-inspired full-stack application featuring a sle
 
 ```text
 BlackMirror/
-├── src/                    # React Frontend
-│   ├── components/         # Reusable UI components (NavBar, TopBar, ContentCard)
-│   ├── views/              # Main application views (Home, ContentGrid, Auth, Settings)
-│   ├── services/           # API and local storage communication
+├── src/                    # React Frontend (DDD Architecture)
+│   ├── core/               # Business Rules
+│   │   ├── domain/         # Pure models (types, interfaces)
+│   │   └── useCases/       # Custom hooks containing UI logic (e.g., useContent)
+│   ├── infrastructure/     # External implementations
+│   │   └── services/       # API fetches (Cloudflare, AI endpoints)
+│   ├── presentation/       # UI Layer
+│   │   ├── components/     # Reusable, "dumb" UI components
+│   │   └── views/          # Main application screens
 │   ├── index.css           # Global Tailwind and custom cinematic styles
 │   └── App.tsx             # Main router and layout wrapper
 ├── server/                 # Cloudflare Worker API (Hono)

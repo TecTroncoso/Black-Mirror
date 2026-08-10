@@ -1,7 +1,7 @@
 import React from 'react';
 import { Settings } from 'lucide-react';
 import { Terminal } from '../components/Terminal';
-import { LogEntry } from '../types';
+import { LogEntry } from '../../core/domain/models';
 
 interface SettingsViewProps {
     logs: LogEntry[];

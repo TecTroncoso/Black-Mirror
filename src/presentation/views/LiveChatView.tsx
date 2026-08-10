@@ -1,6 +1,6 @@
 import React from 'react';
 import { Search as SearchIcon, Send, Mic } from 'lucide-react';
-import { ChatMessage } from '../types';
+import { ChatMessage } from '../../core/domain/models';
 
 interface LiveChatViewProps {
   chatHistory: ChatMessage[];

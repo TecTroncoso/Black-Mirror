@@ -1,6 +1,6 @@
 import React from 'react';
 import { Search, Home, Tv, Film, Clapperboard, Swords, ShieldAlert, Settings, User } from 'lucide-react';
-import { AppView } from '../types';
+import { AppView } from '../../core/domain/models';
 
 interface NavBarProps {
   currentView: AppView;

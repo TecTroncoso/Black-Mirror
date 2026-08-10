@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { LogEntry } from '../types';
+import { LogEntry } from '../../core/domain/models';
 import { Terminal as TerminalIcon, XCircle, Search } from 'lucide-react';
 
 interface TerminalProps {

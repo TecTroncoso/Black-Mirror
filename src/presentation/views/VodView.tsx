@@ -1,6 +1,6 @@
 import React from 'react';
 import { ModuleList } from '../components/ModuleList';
-import { Module } from '../types';
+import { Module } from '../../core/domain/models';
 
 interface VodViewProps {
     modules: Module[];

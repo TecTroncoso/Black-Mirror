@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { NavBar } from './components/NavBar';
-import { TopBar } from './components/TopBar';
-import { AppView, LogEntry, Module, ChatMessage, User, UserSettings } from './types';
-import { checkConnection, generateStreamResponse } from './services/aiService';
+import { NavBar } from './presentation/components/NavBar';
+import { TopBar } from './presentation/components/TopBar';
+import { AppView, LogEntry, Module, ChatMessage, User, UserSettings } from './core/domain/models';
+import { checkConnection, generateStreamResponse } from './infrastructure/services/aiService';
 import { DEFAULT_MODULES } from './data/defaultModules';
-import { getStoredUser, logoutUser } from './services/authService';
+import { getStoredUser, logoutUser } from './infrastructure/services/authService';
 
-import { HomeView } from './views/HomeView';
-import { LiveChatView } from './views/LiveChatView';
-import { VodView } from './views/VodView';
-import { SettingsView } from './views/SettingsView';
-import { AuthView } from './views/AuthView';
-import { ContentGridView } from './views/ContentGridView';
+import { HomeView } from './presentation/views/HomeView';
+import { LiveChatView } from './presentation/views/LiveChatView';
+import { VodView } from './presentation/views/VodView';
+import { SettingsView } from './presentation/views/SettingsView';
+import { AuthView } from './presentation/views/AuthView';
+import { ContentGridView } from './presentation/views/ContentGridView';
 
 const getStoredSettings = (): UserSettings => {
   try {

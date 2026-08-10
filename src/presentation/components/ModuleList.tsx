@@ -1,5 +1,5 @@
 import React from 'react';
-import { Module } from '../types';
+import { Module } from '../../core/domain/models';
 import { Play, Plus } from 'lucide-react';
 
 interface ModuleListProps {

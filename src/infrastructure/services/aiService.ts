@@ -1,4 +1,4 @@
-import { ChatMessage } from '../types';
+import { ChatMessage } from '../../core/domain/models';
 
 export const generateStreamResponse = async (
   prompt: string,

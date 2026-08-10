@@ -1,4 +1,4 @@
-import { User } from '../types';
+import { User } from '../../core/domain/models';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || '';
 

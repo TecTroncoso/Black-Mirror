@@ -1,4 +1,4 @@
-import { Module } from '../types';
+import { Module } from '../core/domain/models';
 
 export const DEFAULT_MODULES: Module[] = [
   {

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Mail, Lock, User, LogIn, UserPlus } from 'lucide-react';
-import { loginUser, registerUser } from '../services/authService';
-import { User as UserModel } from '../types';
+import { loginUser, registerUser } from '../../infrastructure/services/authService';
+import { User as UserModel } from '../../core/domain/models';
 
 interface AuthViewProps {
     onLoginSuccess: (user: UserModel) => void;
