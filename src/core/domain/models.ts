@@ -80,5 +80,12 @@ export enum AppView {
   SERIES = 'series',
   ANIME = 'anime',
   ADULT_ANIME = 'adult_anime',
-  SETTINGS = 'settings'
+  SETTINGS = 'settings',
+  DETAIL = 'detail'
+}
+
+export interface NavigationState {
+  view: AppView;
+  slug?: string;
+  contentType?: ContentType;
 }

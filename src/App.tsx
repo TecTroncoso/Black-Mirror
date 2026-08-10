@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { NavBar } from './presentation/components/NavBar';
 import { TopBar } from './presentation/components/TopBar';
-import { AppView, LogEntry, Module, ChatMessage, User, UserSettings } from './core/domain/models';
+import { AppView, LogEntry, Module, ChatMessage, User, UserSettings, NavigationState } from './core/domain/models';
 import { checkConnection, generateStreamResponse } from './infrastructure/services/aiService';
 import { DEFAULT_MODULES } from './data/defaultModules';
 import { getStoredUser, logoutUser } from './infrastructure/services/authService';
@@ -12,6 +12,7 @@ import { VodView } from './presentation/views/VodView';
 import { SettingsView } from './presentation/views/SettingsView';
 import { AuthView } from './presentation/views/AuthView';
 import { ContentGridView } from './presentation/views/ContentGridView';
+import { ContentDetailView } from './presentation/views/ContentDetailView';
 
 const getStoredSettings = (): UserSettings => {
   try {
@@ -23,7 +24,7 @@ const getStoredSettings = (): UserSettings => {
 
 export default function App() {
   const [user, setUser] = useState<User | null>(getStoredUser());
-  const [view, setView] = useState<AppView>(AppView.HOME);
+  const [nav, setNav] = useState<NavigationState>({ view: AppView.HOME });
   const [settings, setSettings] = useState<UserSettings>(getStoredSettings());
   const [isConnected, setIsConnected] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -60,8 +61,8 @@ export default function App() {
   const toggleAdultContent = () => {
     setSettings(prev => ({ ...prev, adultContentEnabled: !prev.adultContentEnabled }));
     // If disabling and currently viewing adult content, redirect home
-    if (settings.adultContentEnabled && view === AppView.ADULT_ANIME) {
-      setView(AppView.HOME);
+    if (settings.adultContentEnabled && (nav.view === AppView.ADULT_ANIME || nav.contentType === 'adult_anime')) {
+      setNav({ view: AppView.HOME });
     }
   };
 
@@ -85,7 +86,7 @@ export default function App() {
     
     const target = modules.find(m => m.id === id);
     if (target && !target.enabled) {
-        setView(AppView.LIVE);
+        setNav({ view: AppView.LIVE });
         setChatHistory([{ role: 'model', text: `Switched to channel: ${target.name}. ${target.description}` }]);
     }
   };
@@ -135,7 +136,7 @@ export default function App() {
         <div className="ambient-glow"></div>
         <AuthView onLoginSuccess={(loggedInUser) => {
             setUser(loggedInUser);
-            setView(AppView.HOME);
+            setNav({ view: AppView.HOME });
         }} />
       </div>
     );
@@ -146,21 +147,21 @@ export default function App() {
       {/* Global Background Ambient */}
       <div className="ambient-glow"></div>
       
-      <NavBar currentView={view} setView={setView} adultContentEnabled={settings.adultContentEnabled} />
+      <NavBar currentView={nav.view} setView={(v) => setNav({ view: v })} adultContentEnabled={settings.adultContentEnabled} />
       
       <main className="flex-1 flex flex-col min-w-0 relative z-10 mb-20 md:mb-0 h-full">
         <TopBar isConnected={isConnected} currentTime={currentTime} hidden={topBarHidden} />
         <div className="flex-1 px-4 md:px-12 pb-24 md:pb-6 overflow-y-auto overflow-x-hidden" onScroll={handleContentScroll}>
-            {view === AppView.HOME && (
+            {nav.view === AppView.HOME && (
                 <HomeView 
                     isConnected={isConnected} 
                     isProcessing={isProcessing} 
                     modules={modules} 
-                    onAction={() => setView(AppView.LIVE)} 
+                    onAction={() => setNav({ view: AppView.LIVE })} 
                     onToggleModule={handleToggleModule} 
                 />
             )}
-            {view === AppView.SEARCH && (
+            {nav.view === AppView.SEARCH && (
                 <LiveChatView 
                     chatHistory={chatHistory} 
                     promptInput={promptInput} 
@@ -169,7 +170,7 @@ export default function App() {
                     onSendPrompt={handleSendPrompt} 
                 />
             )} 
-            {view === AppView.LIVE && (
+            {nav.view === AppView.LIVE && (
                 <LiveChatView 
                     chatHistory={chatHistory} 
                     promptInput={promptInput} 
@@ -178,25 +179,50 @@ export default function App() {
                     onSendPrompt={handleSendPrompt} 
                 />
             )}
-            {view === AppView.VOD && (
+            {nav.view === AppView.VOD && (
                 <VodView 
                     modules={modules} 
                     onToggleModule={handleToggleModule} 
                 />
             )}
-            {view === AppView.MOVIES && (
-                <ContentGridView contentType="movie" title="Movies" />
+            {nav.view === AppView.MOVIES && (
+                <ContentGridView 
+                    contentType="movie" 
+                    title="Movies" 
+                    onContentSelect={(slug) => setNav({ view: AppView.DETAIL, contentType: 'movie', slug })}
+                />
             )}
-            {view === AppView.SERIES && (
-                <ContentGridView contentType="series" title="Series" />
+            {nav.view === AppView.SERIES && (
+                <ContentGridView 
+                    contentType="series" 
+                    title="Series" 
+                    onContentSelect={(slug) => setNav({ view: AppView.DETAIL, contentType: 'series', slug })}
+                />
             )}
-            {view === AppView.ANIME && (
-                <ContentGridView contentType="anime" title="Anime" />
+            {nav.view === AppView.ANIME && (
+                <ContentGridView 
+                    contentType="anime" 
+                    title="Anime" 
+                    onContentSelect={(slug) => setNav({ view: AppView.DETAIL, contentType: 'anime', slug })}
+                />
             )}
-            {view === AppView.ADULT_ANIME && settings.adultContentEnabled && (
-                <ContentGridView contentType="adult_anime" title="Adult Anime" />
+            {nav.view === AppView.ADULT_ANIME && settings.adultContentEnabled && (
+                <ContentGridView 
+                    contentType="adult_anime" 
+                    title="Adult Anime" 
+                    onContentSelect={(slug) => setNav({ view: AppView.DETAIL, contentType: 'adult_anime', slug })}
+                />
             )}
-            {view === AppView.SETTINGS && (
+            {nav.view === AppView.DETAIL && nav.contentType && nav.slug && (
+                <ContentDetailView 
+                    contentType={nav.contentType}
+                    slug={nav.slug}
+                    onBack={() => setNav({ view: nav.contentType === 'adult_anime' ? AppView.ADULT_ANIME : 
+                                            nav.contentType === 'anime' ? AppView.ANIME : 
+                                            nav.contentType === 'series' ? AppView.SERIES : AppView.MOVIES })}
+                />
+            )}
+            {nav.view === AppView.SETTINGS && (
                 <div className="space-y-6">
                     <div className="bg-black/60 backdrop-blur-xl rounded-3xl border border-white/10 p-6 shadow-2xl flex items-center justify-between">
                         <div className="space-y-1">

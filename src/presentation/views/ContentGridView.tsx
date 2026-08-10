@@ -6,6 +6,7 @@ import { Loader2, Play, Search } from 'lucide-react';
 interface ContentGridViewProps {
     contentType: ContentType;
     title: string;
+    onContentSelect?: (slug: string) => void;
 }
 
 const CONTENT_LABELS: Record<ContentType, string> = {
@@ -15,7 +16,7 @@ const CONTENT_LABELS: Record<ContentType, string> = {
     adult_anime: 'Adult Anime',
 };
 
-export const ContentGridView: React.FC<ContentGridViewProps> = ({ contentType, title }) => {
+export const ContentGridView: React.FC<ContentGridViewProps> = ({ contentType, title, onContentSelect }) => {
     const { 
         items, 
         error, 
@@ -100,9 +101,9 @@ export const ContentGridView: React.FC<ContentGridViewProps> = ({ contentType, t
                     {filtered.map((item, index) => {
                         // Attach observer ref to the last element in the grid
                         if (index === filtered.length - 1) {
-                            return <div ref={lastElementRef} key={item.slug}><ContentCard item={item} /></div>;
+                            return <div ref={lastElementRef} key={item.slug}><ContentCard item={item} onClick={() => onContentSelect?.(item.slug)} /></div>;
                         }
-                        return <ContentCard key={item.slug} item={item} />;
+                        return <ContentCard key={item.slug} item={item} onClick={() => onContentSelect?.(item.slug)} />;
                     })}
                 </div>
             )}
@@ -117,9 +118,12 @@ export const ContentGridView: React.FC<ContentGridViewProps> = ({ contentType, t
     );
 };
 
-const ContentCard: React.FC<{ item: ContentItem }> = ({ item }) => {
+const ContentCard: React.FC<{ item: ContentItem; onClick?: () => void }> = ({ item, onClick }) => {
     return (
-        <button className="group relative flex flex-col rounded-2xl overflow-hidden bg-white/5 border border-white/5 hover:border-tv-focus/30 transition-all duration-300 hover:scale-[1.03] hover:shadow-[0_0_20px_rgba(59,130,246,0.15)] text-left w-full">
+        <button 
+            onClick={onClick}
+            className="group relative flex flex-col rounded-2xl overflow-hidden bg-white/5 border border-white/5 hover:border-tv-focus/30 transition-all duration-300 hover:scale-[1.03] hover:shadow-[0_0_20px_rgba(59,130,246,0.15)] text-left w-full"
+        >
             {/* Poster */}
             <div className="relative aspect-[2/3] w-full overflow-hidden">
                 {item.portada ? (
