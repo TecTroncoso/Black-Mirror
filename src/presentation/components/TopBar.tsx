@@ -4,11 +4,14 @@ import { Wifi, Bell } from 'lucide-react';
 interface TopBarProps {
   isConnected: boolean;
   currentTime: Date;
+  hidden?: boolean;
 }
 
-export const TopBar: React.FC<TopBarProps> = ({ isConnected, currentTime }) => {
+export const TopBar: React.FC<TopBarProps> = ({ isConnected, currentTime, hidden = false }) => {
   return (
-    <div className="flex justify-between items-center px-4 md:px-8 py-4 md:py-6 z-40 relative">
+    <div className={`flex justify-between items-center px-4 md:px-8 py-4 md:py-6 z-40 relative transition-all duration-300 ${
+      hidden ? '-translate-y-full opacity-0 max-h-0 py-0 overflow-hidden' : 'translate-y-0 opacity-100 max-h-24'
+    }`}>
       <div className="flex items-center space-x-3 md:space-x-4">
          {/* Neon BM Logo */}
          <div className="relative flex items-center justify-center select-none font-['Orbitron']">

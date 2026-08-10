@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { NavBar } from './presentation/components/NavBar';
 import { TopBar } from './presentation/components/TopBar';
 import { AppView, LogEntry, Module, ChatMessage, User, UserSettings } from './core/domain/models';
@@ -32,6 +32,20 @@ export default function App() {
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   const [promptInput, setPromptInput] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [topBarHidden, setTopBarHidden] = useState(false);
+  const lastScrollY = useRef(0);
+
+  const handleContentScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
+    const target = e.currentTarget;
+    const currentY = target.scrollTop;
+    // Hide when scrolling down past 50px, show when scrolling up
+    if (currentY > lastScrollY.current && currentY > 50) {
+      setTopBarHidden(true);
+    } else {
+      setTopBarHidden(false);
+    }
+    lastScrollY.current = currentY;
+  }, []);
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 60000);
@@ -135,8 +149,8 @@ export default function App() {
       <NavBar currentView={view} setView={setView} adultContentEnabled={settings.adultContentEnabled} />
       
       <main className="flex-1 flex flex-col min-w-0 relative z-10 mb-20 md:mb-0 h-full">
-        <TopBar isConnected={isConnected} currentTime={currentTime} />
-        <div className="flex-1 px-4 md:px-12 pb-24 md:pb-6 overflow-y-auto overflow-x-hidden">
+        <TopBar isConnected={isConnected} currentTime={currentTime} hidden={topBarHidden} />
+        <div className="flex-1 px-4 md:px-12 pb-24 md:pb-6 overflow-y-auto overflow-x-hidden" onScroll={handleContentScroll}>
             {view === AppView.HOME && (
                 <HomeView 
                     isConnected={isConnected} 
