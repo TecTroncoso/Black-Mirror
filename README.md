@@ -45,14 +45,34 @@ BlackMirror/
 │   ├── index.css           # Global Tailwind and custom cinematic styles
 │   └── App.tsx             # Main router and layout wrapper
 ├── server/                 # Cloudflare Worker API (Hono)
-│   ├── index.js            # API endpoints and Turso DB connection
-│   └── wrangler.toml       # Cloudflare deployment configuration
+│   └── src/                # Clean Architecture Implementation
+│       ├── domain/         # Core business entities and custom errors
+│       ├── use_cases/      # Application business logic (Auth, Content)
+│       ├── infrastructure/ # External concerns (Turso DB client, Repositories)
+│       ├── presentation/   # Hono HTTP Routes/Controllers
+│       └── index.js        # Composition Root (Dependency Injection)
 └── Scraping/               # Python Scrapers
     └── Hentaila/           # Adult Anime Auto-Scraper
-        ├── api.py          # FastAPI lifecycle and background updater
-        ├── database.py     # Turso DB connection and query formatting
-        └── hentaila_scraper.py # Web scraping logic (BeautifulSoup4)
 ```
+
+---
+
+## 🏛️ Clean Architecture (Backend)
+
+The backend has been completely refactored from a monolithic file into a **Clean Architecture** pattern to guarantee maintainability and separation of concerns.
+
+```mermaid
+graph TD
+    A[Presentation Layer<br/>Hono Routes] -->|Calls| B(Use Cases Layer<br/>Business Logic)
+    B -->|Uses| C{Domain Layer<br/>Entities & Interfaces}
+    D[Infrastructure Layer<br/>Turso DB] -->|Implements| C
+    B -->|Injected via| D
+```
+
+- **Domain Layer**: The heart of the software. Contains pure `User` and `Content` entities with no dependencies.
+- **Use Cases Layer**: Contains rules like `AuthUseCases` and `ContentUseCases`. It orchestrates the flow of data but knows nothing about the database.
+- **Infrastructure Layer**: Contains the Turso implementation of our repositories. If we ever migrate away from Turso, only this folder changes.
+- **Presentation Layer**: Handles HTTP requests via Hono and delegates work to the Use Cases.
 
 ---
 
