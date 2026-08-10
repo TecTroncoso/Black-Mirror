@@ -29,6 +29,7 @@ The project demonstrates advanced architectural patterns across the stack, inclu
 - **Automated Python Scrapers**: Includes a self-hosted, auto-updating scraper orchestrator. Built with Python `asyncio`, `FastAPI`, and `httpx`, it periodically scrapes, processes, and syncs fresh content directly to the Turso Cloud Database in the background.
 - **Edge API & Caching**: A blazing fast REST API built with **Hono.js** and deployed on **Cloudflare Workers** for zero cold starts. It utilizes a Short-TTL Cache strategy (`Cache-Control: max-age=60`) to instantly serve JSON payloads from Edge nodes, reducing database queries by 99% during traffic spikes while keeping content fresh.
 - **Frontend SWR & Pagination**: The UI leverages **SWR (Stale-While-Revalidate)** and Infinite Scrolling to instantly load content from memory on route changes while silently re-fetching updates, ensuring smooth navigation without DOM freezing even with 10,000+ items.
+- **Predictive Prefetching & Dynamic Routing**: Utilizes intent-based hover prefetching for zero-latency page transitions and a custom dynamic routing engine for seamless SPA navigation without external dependencies.
 - **Enterprise Architecture**: Strict separation of concerns ensuring the UI knows nothing about API fetching, and the HTTP routes know nothing about database implementations.
 
 ---
