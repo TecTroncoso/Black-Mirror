@@ -1,4 +1,8 @@
+<div align="right">
+
 [🇺🇸 Read in English](./README.md) | [🇪🇸 Leer en Español](./README.es.md)
+
+</div>
 
 <div align="center">
   <img src="https://via.placeholder.com/150x150/000000/3b82f6?text=BM" alt="Black Mirror Logo" width="120" />
