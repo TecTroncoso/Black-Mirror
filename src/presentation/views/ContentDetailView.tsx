@@ -124,39 +124,42 @@ export const ContentDetailView: React.FC<ContentDetailViewProps> = ({ contentTyp
                     </div>
 
                     {/* Content Details Below Player */}
-                    <div className="flex flex-col space-y-4">
-                        <h1 className="text-3xl font-bold text-white tracking-tight">{detail.titulo}</h1>
-                        
-                        <div className="flex flex-wrap items-center gap-3 text-xs font-semibold text-gray-300">
-                            {detail.tipo && <span className="px-2 py-1 bg-white/10 rounded uppercase">{detail.tipo}</span>}
-                            {detail.temporada && <span className="px-2 py-1 bg-white/10 rounded">{detail.temporada}</span>}
-                            {detail.estado && (
-                                <span className="flex items-center">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-tv-focus mr-1.5"></span>
-                                    {detail.estado}
-                                </span>
-                            )}
-                            {detail.categorias?.map(cat => (
-                                <span key={cat} className="px-2 py-1 border border-white/10 rounded text-gray-400">{cat}</span>
-                            ))}
+                    <div className="flex flex-col md:flex-row gap-6 items-start justify-between">
+                        {/* Title, Badges, and Description */}
+                        <div className="flex flex-col space-y-4 flex-1">
+                            <h1 className="text-3xl font-bold text-white tracking-tight">{detail.titulo}</h1>
+                            
+                            <div className="flex flex-wrap items-center gap-3 text-xs font-semibold text-gray-300">
+                                {detail.tipo && <span className="px-2 py-1 bg-white/10 rounded uppercase">{detail.tipo}</span>}
+                                {detail.temporada && <span className="px-2 py-1 bg-white/10 rounded">{detail.temporada}</span>}
+                                {detail.estado && (
+                                    <span className="flex items-center">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-tv-focus mr-1.5"></span>
+                                        {detail.estado}
+                                    </span>
+                                )}
+                                {detail.categorias?.map(cat => (
+                                    <span key={cat} className="px-2 py-1 border border-white/10 rounded text-gray-400 hover:text-white transition-colors cursor-pointer">{cat}</span>
+                                ))}
+                            </div>
+
+                            <p className="text-gray-400 text-sm leading-relaxed max-w-3xl">
+                                {detail.descripcion || detail.sinopsis_corta}
+                            </p>
                         </div>
 
-                        <p className="text-gray-400 text-sm leading-relaxed max-w-3xl">
-                            {detail.descripcion || detail.sinopsis_corta}
-                        </p>
-
-                        {/* Actions */}
-                        <div className="flex gap-3 pt-2">
-                            <button className="flex items-center px-4 py-2 bg-white/5 hover:bg-white/10 text-white rounded-lg transition-colors text-sm font-medium border border-white/5">
-                                <BookmarkPlus size={16} className="mr-2" />
+                        {/* Actions (Right Side) */}
+                        <div className="flex flex-col gap-2 w-full md:w-48 flex-shrink-0 pt-2 md:pt-0">
+                            <button className="flex items-center justify-center px-4 py-3 bg-white/5 hover:bg-white/10 text-white rounded-lg transition-colors text-sm font-medium border border-white/5 w-full">
+                                <BookmarkPlus size={18} className="mr-3" />
                                 Añadir a mi lista
                             </button>
-                            <button className="flex items-center px-4 py-2 bg-white/5 hover:bg-white/10 text-white rounded-lg transition-colors text-sm font-medium border border-white/5">
-                                <Star size={16} className="mr-2" />
+                            <button className="flex items-center justify-center px-4 py-3 bg-white/5 hover:bg-white/10 text-white rounded-lg transition-colors text-sm font-medium border border-white/5 w-full">
+                                <Star size={18} className="mr-3" />
                                 Valorar
                             </button>
-                            <button className="flex items-center px-4 py-2 bg-white/5 hover:bg-white/10 text-white rounded-lg transition-colors text-sm font-medium border border-white/5">
-                                <Share2 size={16} className="mr-2" />
+                            <button className="flex items-center justify-center px-4 py-3 bg-white/5 hover:bg-white/10 text-white rounded-lg transition-colors text-sm font-medium border border-white/5 w-full">
+                                <Share2 size={18} className="mr-3" />
                                 Compartir
                             </button>
                         </div>
