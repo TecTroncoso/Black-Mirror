@@ -9,8 +9,8 @@ interface TopBarProps {
 
 export const TopBar: React.FC<TopBarProps> = ({ isConnected, currentTime, hidden = false }) => {
   return (
-    <div className={`flex justify-between items-center px-4 md:px-8 py-4 md:py-6 z-40 relative transition-all duration-300 ${
-      hidden ? '-translate-y-full opacity-0 max-h-0 py-0 overflow-hidden' : 'translate-y-0 opacity-100 max-h-24'
+    <div className={`flex justify-between items-center px-4 md:px-8 py-4 md:py-6 z-40 relative transition-[transform,opacity] duration-500 ease-in-out ${
+      hidden ? '-translate-y-full opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'
     }`}>
       <div className="flex items-center space-x-3 md:space-x-4">
          {/* Neon BM Logo */}
