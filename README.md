@@ -1,8 +1,8 @@
+[🇪🇸 Leer en Español](./README.es.md)
+
 # Black Mirror OS 📺
 
 Black Mirror is a futuristic, TV-inspired full-stack application featuring a sleek, dark-themed OS interface. It provides a modular streaming platform, an authentication system, dynamic content grids, and a scalable architecture designed to handle thousands of media entries effortlessly.
-
-![Black Mirror Interface](https://via.placeholder.com/1200x600/000000/3b82f6?text=Black+Mirror+OS)
 
 ## ✨ Core Features
 
@@ -20,12 +20,13 @@ Black Mirror is a futuristic, TV-inspired full-stack application featuring a sle
 - **Framework**: React 19 (TypeScript) + Vite
 - **Styling**: Tailwind CSS v4
 - **Icons**: Lucide React
-- **Architecture**: Context-free prop drilling for lightweight state, local storage persistence for user preferences.
+- **Architecture**: Domain-Driven Design (DDD) — `core/`, `infrastructure/`, `presentation/`
 
 ### Backend (Edge API)
 - **Runtime**: Cloudflare Workers
 - **Framework**: Hono.js
 - **Database**: Turso (SQLite on the Edge) via `@libsql/client`
+- **Architecture**: Clean Architecture — `domain/`, `use_cases/`, `infrastructure/`, `presentation/`
 
 ### Scraping Engine (Orchestrator)
 - **Language**: Python 3.9+
@@ -38,31 +39,37 @@ Black Mirror is a futuristic, TV-inspired full-stack application featuring a sle
 
 ```text
 BlackMirror/
-├── src/                    # React Frontend (DDD Architecture)
-│   ├── core/               # Business Rules
-│   │   ├── domain/         # Pure models (types, interfaces)
-│   │   └── useCases/       # Custom hooks containing UI logic (e.g., useContent)
-│   ├── infrastructure/     # External implementations
-│   │   └── services/       # API fetches (Cloudflare, AI endpoints)
-│   ├── presentation/       # UI Layer
-│   │   ├── components/     # Reusable, "dumb" UI components
-│   │   └── views/          # Main application screens
-│   ├── index.css           # Global Tailwind and custom cinematic styles
-│   └── App.tsx             # Main router and layout wrapper
-├── server/                 # Cloudflare Worker API (Hono)
-│   └── src/                # Clean Architecture Implementation
-│       ├── domain/         # Core business entities and custom errors
-│       ├── use_cases/      # Application business logic (Auth, Content)
-│       ├── infrastructure/ # External concerns (Turso DB client, Repositories)
-│       ├── presentation/   # Hono HTTP Routes/Controllers
-│       └── index.js        # Composition Root (Dependency Injection)
-└── Scraping/               # Python Scrapers
-    └── Hentaila/           # Adult Anime Auto-Scraper
+├── src/                        # React Frontend (DDD Architecture)
+│   ├── core/                   # Business Rules
+│   │   ├── domain/             # Pure models (types, interfaces)
+│   │   └── useCases/           # Custom hooks with UI logic (e.g., useContent)
+│   ├── infrastructure/         # External implementations
+│   │   └── services/           # API clients (Cloudflare, AI endpoints)
+│   ├── presentation/           # UI Layer
+│   │   ├── components/         # Reusable, "dumb" UI components
+│   │   └── views/              # Main application screens
+│   ├── data/                   # Static configuration (default modules)
+│   ├── index.css               # Global Tailwind and cinematic styles
+│   └── App.tsx                 # Main router and layout wrapper
+├── server/                     # Cloudflare Worker API (Hono)
+│   └── src/                    # Clean Architecture
+│       ├── domain/             # Core entities and custom errors
+│       ├── use_cases/          # Business logic (Auth, Content)
+│       ├── infrastructure/     # Turso DB client and repositories
+│       ├── presentation/       # Hono HTTP routes/controllers
+│       └── index.js            # Composition Root (Dependency Injection)
+└── Scraping/                   # Python Scrapers
+    └── Hentaila/               # Adult Anime Auto-Scraper
+        ├── api.py              # FastAPI lifecycle and background updater
+        ├── database.py         # Turso DB connection and queries
+        └── hentaila_scraper.py # Web scraping logic (BeautifulSoup4)
 ```
 
 ---
 
-## 🏛️ Clean Architecture (Backend)
+## 🏛️ Architecture
+
+### Backend — Clean Architecture
 
 The backend has been completely refactored from a monolithic file into a **Clean Architecture** pattern to guarantee maintainability and separation of concerns.
 
@@ -74,10 +81,19 @@ graph TD
     B -->|Injected via| D
 ```
 
-- **Domain Layer**: The heart of the software. Contains pure `User` and `Content` entities with no dependencies.
-- **Use Cases Layer**: Contains rules like `AuthUseCases` and `ContentUseCases`. It orchestrates the flow of data but knows nothing about the database.
+- **Domain Layer**: The heart of the software. Contains pure `User` and `Content` entities with zero dependencies.
+- **Use Cases Layer**: Contains `AuthUseCases` and `ContentUseCases`. Orchestrates the flow of data but knows nothing about the database.
 - **Infrastructure Layer**: Contains the Turso implementation of our repositories. If we ever migrate away from Turso, only this folder changes.
 - **Presentation Layer**: Handles HTTP requests via Hono and delegates work to the Use Cases.
+
+### Frontend — Domain-Driven Design (DDD)
+
+The frontend follows a lightweight DDD approach optimized for React:
+
+- **Core / Domain**: Pure TypeScript models and interfaces. No framework dependency.
+- **Core / Use Cases**: Custom hooks (`useContent`) that encapsulate business logic and state management.
+- **Infrastructure**: Services that know how to communicate with external APIs.
+- **Presentation**: Components and Views that are purely visual. They receive data and render it — nothing more.
 
 ---
 
@@ -85,57 +101,51 @@ graph TD
 
 **Prerequisites:** Node.js (v18+) and Python 3.9+
 
-### 1. Setup the Edge API (Cloudflare Worker)
-Navigate to the server directory and install dependencies:
+### 1. Edge API (Cloudflare Worker)
 ```bash
 cd server
 npm install
 ```
-Add your Turso credentials. Create a `.dev.vars` file inside the `server/` directory:
+Create a `.dev.vars` file inside `server/`:
 ```env
 TURSO_DATABASE_URL=libsql://your-db-url.turso.io
 TURSO_AUTH_TOKEN=your-token
 ```
-Start the local Cloudflare Worker emulator:
 ```bash
 npm run dev
+# API running at http://localhost:8787
 ```
-*The API will run locally on `http://localhost:8787`.*
 
-### 2. Setup the Content Scrapers (Python)
-Navigate to the specific scraper directory you want to run:
+### 2. Content Scrapers (Python)
 ```bash
 cd Scraping/Hentaila
 pip install -r requirements.txt
 ```
-Copy your Turso credentials. Create a `.env` file inside the `Scraping/Hentaila/` directory:
+Create a `.env` file inside `Scraping/Hentaila/`:
 ```env
 TURSO_DATABASE_URL=libsql://your-db-url.turso.io
 TURSO_AUTH_TOKEN=your-token
 ```
-Start the Auto-Scraper (this will sync the Turso DB with the latest content):
 ```bash
 python api.py
 ```
 
-### 3. Setup the Frontend (Vite)
-Open a new terminal at the root of the project:
+### 3. Frontend (Vite)
 ```bash
 npm install
 ```
-If you want to connect to your production API instead of the local emulator, create a `.env` file in the root directory:
+Optionally create a `.env` in the project root to point to your production API:
 ```env
 VITE_API_URL=https://your-cloudflare-worker-url.workers.dev
 ```
-Run the frontend development server:
 ```bash
 npm run dev
+# UI at http://localhost:5173
 ```
-*The UI will be accessible at `http://localhost:5173`.*
 
 ---
 
-## 📦 Database Schema Design
+## 📦 Database Schema
 
 This project avoids fragmented tables by using a **Universal Content Architecture**. All content resides in a single `content` table:
 
@@ -146,14 +156,15 @@ This project avoids fragmented tables by using a **Universal Content Architectur
 | `title` | `TEXT` | Display title. |
 | `poster` | `TEXT` | URL to the thumbnail/poster image. |
 | `total_episodes` | `INTEGER` | Number of episodes (defaults to 1 for movies). |
-| `details` | `TEXT (JSON)` | Flexible schema containing specific data (servers, actors, ratings). |
+| `details` | `TEXT (JSON)` | Flexible JSON schema for type-specific data (servers, actors, ratings). |
 
-This allows for blazing fast global searches (`SELECT * FROM content WHERE title LIKE ?`) without complex SQL `JOIN` operations.
+This enables blazing-fast global searches (`SELECT * FROM content WHERE title LIKE ?`) without complex SQL `JOIN` operations.
 
 ---
 
 ## 🔒 Security & Best Practices
 
-- **Environment Variables**: All `.env` and `.dev.vars` files are globally ignored by Git. Never commit Turso or Cloudflare credentials.
-- **Edge Deployment**: The backend is completely serverless, scaling automatically via Cloudflare's Edge network, minimizing latency globally.
-- **Graceful Error Handling**: Scrapers run continuously in the background, utilizing try-catch blocks and async concurrency to prevent connection pooling issues or application crashes.
+- **Environment Variables**: All `.env` and `.dev.vars` files are globally ignored by Git. Never commit credentials.
+- **Edge Deployment**: The backend is completely serverless, scaling automatically via Cloudflare's Edge network.
+- **Custom Domain Errors**: The backend uses typed error classes (`NotFoundError`, `ValidationError`, `ConflictError`) instead of generic exceptions.
+- **Graceful Error Handling**: Scrapers run continuously in the background with try-catch blocks and async concurrency to prevent crashes.
