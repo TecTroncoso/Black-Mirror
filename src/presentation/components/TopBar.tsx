@@ -11,19 +11,19 @@ export const TopBar: React.FC<TopBarProps> = ({ isConnected, currentTime }) => {
     <div className="flex justify-between items-center px-4 md:px-8 py-4 md:py-6 z-40 relative">
       <div className="flex items-center space-x-3 md:space-x-4">
          {/* Neon BM Logo */}
-         <div className="relative flex items-center justify-center select-none">
+         <div className="relative flex items-center justify-center select-none font-['Orbitron']">
              {/* Glow behind */}
              <div className="absolute inset-0 bg-purple-600/50 blur-[12px] rounded-full scale-110 translate-x-1"></div>
              {/* Letters */}
-             <div className="relative flex items-center font-black text-2xl md:text-3xl tracking-tighter">
+             <div className="relative flex items-center font-black text-3xl md:text-4xl tracking-tighter">
                  <span className="text-white drop-shadow-md z-10 relative">B</span>
-                 <span className="text-[#a855f7] -ml-1.5 drop-shadow-[0_0_10px_rgba(168,85,247,0.8)] z-0 relative">M</span>
+                 <span className="text-[#a855f7] -ml-2 drop-shadow-[0_0_10px_rgba(168,85,247,0.8)] z-0 relative">M</span>
              </div>
          </div>
          {/* Brand Text */}
-         <div className="flex flex-col justify-center mt-0.5 md:mt-1 select-none">
-            <span className="font-bold text-base md:text-xl text-white tracking-[0.15em] leading-none">
-                BLACK <span className="text-[#a855f7] font-semibold drop-shadow-[0_0_5px_rgba(168,85,247,0.5)]">MIRROR</span>
+         <div className="flex flex-col justify-center mt-0.5 md:mt-1 select-none font-['Orbitron']">
+            <span className="font-bold text-lg md:text-2xl text-white tracking-[0.15em] leading-none uppercase">
+                Black <span className="text-[#a855f7] font-semibold drop-shadow-[0_0_5px_rgba(168,85,247,0.5)]">Mirror</span>
             </span>
          </div>
       </div>
