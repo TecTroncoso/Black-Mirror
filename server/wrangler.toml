@@ -1,5 +1,5 @@
 name = "blackmirror-api"
-main = "index.js"
+main = "src/index.js"
 compatibility_date = "2024-03-20"
 
 # Note: Secrets like TURSO_DATABASE_URL and TURSO_AUTH_TOKEN
