@@ -1,99 +1,109 @@
-[🇺🇸 Read in English](./README.md)
+[🇺🇸 Read in English](./README.md) | [🇪🇸 Leer en Español](./README.es.md)
 
-# Black Mirror OS 📺
+<div align="center">
+  <img src="https://via.placeholder.com/150x150/000000/3b82f6?text=BM" alt="Black Mirror Logo" width="120" />
+  <h1>Black Mirror OS</h1>
+  <p><em>Plataforma de Streaming & IA de Nueva Generación Renderizada en el Edge</em></p>
 
-Black Mirror es una aplicación full-stack de estética futurista inspirada en una interfaz de televisión con tema oscuro. Ofrece una plataforma de streaming modular, un sistema de autenticación, grillas de contenido dinámicas y una arquitectura escalable diseñada para manejar miles de entradas de medios sin esfuerzo.
+  <!-- Badges -->
+  <img src="https://img.shields.io/badge/React-19-blue?style=for-the-badge&logo=react" alt="React" />
+  <img src="https://img.shields.io/badge/TypeScript-Ready-blue?style=for-the-badge&logo=typescript" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/Tailwind_CSS-v4-06B6D4?style=for-the-badge&logo=tailwind-css" alt="Tailwind CSS" />
+  <img src="https://img.shields.io/badge/Cloudflare-Workers-F38020?style=for-the-badge&logo=cloudflare" alt="Cloudflare" />
+  <img src="https://img.shields.io/badge/Turso-Database-4ADE80?style=for-the-badge&logo=sqlite" alt="Turso" />
+  <img src="https://img.shields.io/badge/Python-Scraper-3776AB?style=for-the-badge&logo=python" alt="Python" />
+</div>
+
+---
+
+## 📖 Resumen
+
+Black Mirror es una aplicación full-stack de nivel empresarial (enterprise-grade) con una estética futurista inspirada en una interfaz de sistema operativo en modo oscuro. Ofrece una plataforma de streaming modular, un robusto sistema de autenticación, grillas de contenido dinámicas y una arquitectura inmensamente escalable diseñada para manejar miles de entradas de medios sin esfuerzo en la red Edge.
+
+El proyecto demuestra patrones arquitectónicos avanzados en todo el stack, incluyendo **Clean Architecture** en el backend y **Domain-Driven Design (DDD)** en el frontend, garantizando máxima mantenibilidad, capacidad de testeo y escalabilidad.
 
 ## ✨ Características Principales
 
-- **UI/UX Futurista**: Una interfaz premium en modo oscuro construida con **Tailwind CSS v4**, con glassmorphism, animaciones dinámicas, acentos de neón y una barra de desplazamiento cinemática personalizada.
-- **Arquitectura Universal de Contenido**: Una arquitectura JSON tipo NoSQL altamente escalable alojada en **Turso Edge Database**. Almacena Películas, Series, Anime y Anime para Adultos en una sola tabla unificada, utilizando JSON para flexibilidad infinita de esquema.
-- **Scrapers Automatizados en Python**: Incluye un orquestador de scraping auto-actualizable (ej. Hentaila). Construido con `asyncio` y `httpx` de Python, extrae, procesa y sincroniza contenido periódicamente directo a la Base de Datos en la Nube de Turso.
-- **API en el Edge**: Una API REST ultrarrápida construida con **Hono.js** y desplegada en **Cloudflare Workers**.
-- **Filtrado de Contenido**: Módulo de configuración integrado para alternar categorías de contenido específicas (ej. Contenido para Adultos) de forma dinámica en el cliente.
+- **UI/UX Futurista**: Una interfaz premium en modo oscuro construida con **Tailwind CSS v4**, con glassmorphism, animaciones dinámicas, detalles en neón y una barra de desplazamiento cinemática personalizada.
+- **Arquitectura Universal de Contenido**: Una arquitectura híbrida JSON tipo NoSQL altamente escalable alojada en **Turso Edge Database**. Almacena Películas, Series, Anime y Anime para Adultos en una sola tabla unificada, utilizando payloads JSON para flexibilidad infinita de esquema.
+- **Scrapers Automatizados en Python**: Incluye un orquestador de scraping auto-actualizable. Construido con `asyncio`, `FastAPI` y `httpx` de Python, extrae, procesa y sincroniza contenido fresco periódicamente directo a la Base de Datos en la Nube de Turso en segundo plano.
+- **API en el Edge**: Una API REST ultrarrápida construida con **Hono.js** y desplegada en **Cloudflare Workers** para tiempos de inicio en frío nulos y latencia global baja.
+- **Arquitectura Empresarial**: Estricta separación de responsabilidades que garantiza que la interfaz de usuario no sepa nada sobre cómo se obtienen los datos de la API, y las rutas HTTP no sepan nada sobre las implementaciones de la base de datos.
 
 ---
 
-## 🛠️ Stack Tecnológico
+## 🏛️ Arquitectura Empresarial
 
-### Frontend (Cliente)
-- **Framework**: React 19 (TypeScript) + Vite
-- **Estilos**: Tailwind CSS v4
-- **Iconos**: Lucide React
-- **Arquitectura**: Domain-Driven Design (DDD) — `core/`, `infrastructure/`, `presentation/`
+### Backend — Clean Architecture (Cloudflare Workers)
 
-### Backend (API en el Edge)
-- **Runtime**: Cloudflare Workers
-- **Framework**: Hono.js
-- **Base de Datos**: Turso (SQLite en el Edge) vía `@libsql/client`
-- **Arquitectura**: Clean Architecture — `domain/`, `use_cases/`, `infrastructure/`, `presentation/`
+La API del backend evita la clásica trampa del "monolito" al implementar una **Clean Architecture** estricta. Esto garantiza la separación de responsabilidades y prepara el código para el futuro.
 
-### Motor de Scraping (Orquestador)
-- **Lenguaje**: Python 3.9+
-- **Framework**: FastAPI (para gestión del ciclo de vida)
-- **Librerías**: `httpx` (HTTP asíncrono), `BeautifulSoup4` (parsing HTML)
+```mermaid
+graph TD
+    A[Capa de Presentación<br/>Rutas Hono] -->|Invoca| B(Capa de Casos de Uso<br/>Reglas de Negocio)
+    B -->|Opera sobre| C{Capa de Dominio<br/>Entidades y Errores}
+    D[Capa de Infraestructura<br/>Repositorios Turso] -->|Implementa| C
+    B -->|Inyectado vía Composition Root| D
+```
+
+- **Capa de Dominio**: El núcleo de la aplicación. Contiene las entidades puras `User` y `Content` sin dependencias externas.
+- **Capa de Casos de Uso**: Contiene reglas de negocio específicas de la aplicación (`AuthUseCases`, `ContentUseCases`). Orquesta el flujo de datos sin saber *de dónde* provienen los mismos.
+- **Capa de Infraestructura**: Implementaciones concretas de nuestras interfaces. Actualmente impulsada por Turso (SQLite en el Edge). Cambiar de base de datos solo requiere intercambiar esta carpeta.
+- **Capa de Presentación**: El punto de entrada. Maneja las solicitudes HTTP a través de Hono, autentica tokens y delega la ejecución a los Casos de Uso.
+- **Composition Root**: La inyección de dependencias se maneja a nivel de cada solicitud en `index.js`, garantizando un uso seguro de la memoria en el entorno serverless de Cloudflare Workers.
+
+### Frontend — Domain-Driven Design (DDD)
+
+El frontend de React aplica un patrón **Domain-Driven Design** ligero y escalable, resolviendo el clásico problema de "estado espagueti" común en aplicaciones React:
+
+- **Core / Domain**: Modelos e interfaces puras de TypeScript. Agnóstico del framework.
+- **Core / Use Cases**: Hooks personalizados (ej. `useContent`) que encapsulan la lógica de negocio, la gestión de estado y los efectos secundarios.
+- **Infrastructure**: Servicios de API que manejan la comunicación HTTP con Cloudflare y endpoints de IA.
+- **Presentation**: Componentes y Vistas puramente visuales. Reciben datos de los Casos de Uso y los renderizan — no hacen fetch de datos directamente.
 
 ---
 
-## 📂 Estructura del Proyecto
+## 📦 Esquema de Base de Datos
+
+Este proyecto evita tablas fragmentadas y migraciones complejas utilizando una **Arquitectura Universal de Contenido**. Todo el contenido reside en una única tabla `content` altamente indexada:
+
+| Columna | Tipo | Descripción |
+|---------|------|-------------|
+| `slug` | `TEXT` | Clave primaria, identificador único del medio. |
+| `content_type` | `TEXT` | Categoriza el medio (`movie`, `series`, `anime`, `adult_anime`). |
+| `title` | `TEXT` | Título para mostrar. |
+| `poster` | `TEXT` | URL del póster/miniatura. |
+| `total_episodes` | `INTEGER` | Cantidad de episodios (por defecto 1 para películas). |
+| `details` | `TEXT (JSON)` | Esquema JSON flexible para datos específicos del tipo (ej. servidores, actores, clasificaciones). |
+
+Este enfoque híbrido SQL/NoSQL permite búsquedas globales ultrarrápidas (`SELECT * FROM content WHERE title LIKE ?`) sin costosas operaciones `JOIN`, mientras retiene la flexibilidad del formato JSON para metadatos complejos y profundamente anidados.
+
+---
+
+## 📂 Estructura del Repositorio
 
 ```text
 BlackMirror/
 ├── src/                        # Frontend React (Arquitectura DDD)
-│   ├── core/                   # Reglas de Negocio
-│   │   ├── domain/             # Modelos puros (tipos, interfaces)
-│   │   └── useCases/           # Hooks personalizados con lógica de UI (ej. useContent)
-│   ├── infrastructure/         # Implementaciones externas
-│   │   └── services/           # Clientes de API (Cloudflare, endpoints de IA)
-│   ├── presentation/           # Capa de UI
-│   │   ├── components/         # Componentes reutilizables y "tontos"
-│   │   └── views/              # Pantallas principales de la aplicación
-│   ├── data/                   # Configuración estática (módulos por defecto)
-│   ├── index.css               # Estilos globales de Tailwind y cinemáticos
-│   └── App.tsx                 # Router principal y layout wrapper
+│   ├── core/                   
+│   │   ├── domain/             # Modelos puros en TS (tipos, interfaces)
+│   │   └── useCases/           # Hooks personalizados de React con la lógica
+│   ├── infrastructure/         # Implementaciones externas (clientes API)
+│   ├── presentation/           # Capa de UI (vistas y componentes "tontos")
+│   └── App.tsx                 # Enrutador principal
 ├── server/                     # API en Cloudflare Worker (Hono)
-│   └── src/                    # Clean Architecture
-│       ├── domain/             # Entidades del dominio y errores personalizados
-│       ├── use_cases/          # Lógica de negocio (Auth, Content)
-│       ├── infrastructure/     # Cliente de Turso DB y repositorios
-│       ├── presentation/       # Rutas/controladores HTTP de Hono
+│   └── src/                    # Clean Architecture del Backend
+│       ├── domain/             # Entidades principales y errores
+│       ├── use_cases/          # Lógica de negocio
+│       ├── infrastructure/     # Cliente DB Turso y repositorios
+│       ├── presentation/       # Rutas HTTP (Hono)
 │       └── index.js            # Composition Root (Inyección de Dependencias)
 └── Scraping/                   # Scrapers en Python
-    └── Hentaila/               # Auto-Scraper de Anime para Adultos
-        ├── api.py              # Ciclo de vida FastAPI y actualizador en segundo plano
-        ├── database.py         # Conexión a Turso DB y consultas
+    └── Hentaila/               # Scraper Automatizado
+        ├── api.py              # Orquestador FastAPI y tarea en segundo plano
+        ├── database.py         # Conexión directa a la BD de Turso
         └── hentaila_scraper.py # Lógica de web scraping (BeautifulSoup4)
 ```
-
----
-
-## 🏛️ Arquitectura
-
-### Backend — Clean Architecture
-
-El backend fue completamente refactorizado de un archivo monolítico a un patrón de **Clean Architecture** para garantizar la mantenibilidad y la separación de responsabilidades.
-
-```mermaid
-graph TD
-    A[Capa de Presentación<br/>Rutas Hono] -->|Llama a| B(Capa de Casos de Uso<br/>Lógica de Negocio)
-    B -->|Usa| C{Capa de Dominio<br/>Entidades e Interfaces}
-    D[Capa de Infraestructura<br/>Turso DB] -->|Implementa| C
-    B -->|Inyectado vía| D
-```
-
-- **Capa de Dominio**: El corazón del software. Contiene entidades puras de `User` y `Content` sin ninguna dependencia.
-- **Capa de Casos de Uso**: Contiene `AuthUseCases` y `ContentUseCases`. Orquesta el flujo de datos pero no sabe nada sobre la base de datos.
-- **Capa de Infraestructura**: Contiene la implementación de Turso de nuestros repositorios. Si algún día migramos de Turso, solo esta carpeta cambia.
-- **Capa de Presentación**: Maneja las solicitudes HTTP a través de Hono y delega el trabajo a los Casos de Uso.
-
-### Frontend — Domain-Driven Design (DDD)
-
-El frontend sigue un enfoque ligero de DDD optimizado para React:
-
-- **Core / Domain**: Modelos e interfaces puras de TypeScript. Sin dependencia de framework.
-- **Core / Use Cases**: Hooks personalizados (`useContent`) que encapsulan la lógica de negocio y el manejo de estado.
-- **Infrastructure**: Servicios que saben cómo comunicarse con las APIs externas.
-- **Presentation**: Componentes y Vistas que son puramente visuales. Reciben datos y los renderizan — nada más.
 
 ---
 
@@ -113,7 +123,7 @@ TURSO_AUTH_TOKEN=tu-token
 ```
 ```bash
 npm run dev
-# API corriendo en http://localhost:8787
+# La API correrá en http://localhost:8787
 ```
 
 ### 2. Scrapers de Contenido (Python)
@@ -131,40 +141,24 @@ python api.py
 ```
 
 ### 3. Frontend (Vite)
+Abrí una nueva terminal en la raíz del proyecto:
 ```bash
 npm install
 ```
-Opcionalmente creá un `.env` en la raíz del proyecto para apuntar a tu API de producción:
+Opcionalmente, creá un archivo `.env` para apuntar a tu API en producción:
 ```env
-VITE_API_URL=https://tu-url-cloudflare-worker.workers.dev
+VITE_API_URL=https://tu-url-worker.workers.dev
 ```
 ```bash
 npm run dev
-# UI en http://localhost:5173
+# La UI correrá en http://localhost:5173
 ```
 
 ---
 
-## 📦 Esquema de Base de Datos
+## 🔒 Seguridad y Mejores Prácticas
 
-Este proyecto evita tablas fragmentadas usando una **Arquitectura Universal de Contenido**. Todo el contenido reside en una sola tabla `content`:
-
-| Columna | Tipo | Descripción |
-|---------|------|-------------|
-| `slug` | `TEXT` | Clave primaria, identificador único del medio. |
-| `content_type` | `TEXT` | Categoriza el medio (`movie`, `series`, `anime`, `adult_anime`). |
-| `title` | `TEXT` | Título para mostrar. |
-| `poster` | `TEXT` | URL de la imagen miniatura/póster. |
-| `total_episodes` | `INTEGER` | Número de episodios (por defecto 1 para películas). |
-| `details` | `TEXT (JSON)` | Esquema JSON flexible para datos específicos por tipo (servidores, actores, ratings). |
-
-Esto permite búsquedas globales ultrarrápidas (`SELECT * FROM content WHERE title LIKE ?`) sin operaciones complejas de `JOIN` en SQL.
-
----
-
-## 🔒 Seguridad y Buenas Prácticas
-
-- **Variables de Entorno**: Todos los archivos `.env` y `.dev.vars` son ignorados globalmente por Git. Nunca subas credenciales.
-- **Despliegue en el Edge**: El backend es completamente serverless, escalando automáticamente vía la red Edge de Cloudflare.
-- **Errores de Dominio Tipados**: El backend usa clases de error tipadas (`NotFoundError`, `ValidationError`, `ConflictError`) en lugar de excepciones genéricas.
-- **Manejo Elegante de Errores**: Los scrapers corren continuamente en segundo plano con bloques try-catch y concurrencia async para prevenir caídas.
+- **Entorno Zero-Trust**: Todos los archivos `.env` y `.dev.vars` son ignorados globalmente por Git. 
+- **Despliegue en el Edge**: El backend es 100% serverless, escalando automáticamente a través de la red global Edge de Cloudflare.
+- **Errores de Dominio Personalizados**: El backend evita las excepciones genéricas utilizando estrictas clases de error tipadas (`NotFoundError`, `ValidationError`, `ConflictError`).
+- **Scraping Resiliente**: El scraper en Python corre en un bucle continuo en segundo plano, con bloques `try-catch` localizados y concurrencia mediante `asyncio`, previniendo fugas de memoria y bloqueos de la aplicación.
