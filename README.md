@@ -58,8 +58,17 @@ graph TD
 
 The React frontend applies a lightweight, scalable **Domain-Driven Design** pattern, resolving the classic "spaghetti state" problem common in React apps:
 
+```mermaid
+graph TD
+    A[Presentation Layer<br/>Views & Components] -->|consumes| B(Use Cases Layer<br/>Custom Hooks)
+    B -->|calls| C[Infrastructure Layer<br/>API Services]
+    B -->|reads/writes| D{Core / Domain<br/>Models & Interfaces}
+    C -->|implements| D
+    C -->|HTTP| E[Cloudflare Workers API]
+```
+
 - **Core / Domain**: Pure TypeScript models and interfaces. Framework-agnostic.
-- **Core / Use Cases**: Custom hooks (e.g., `useContent`) that encapsulate business logic, state management, and side effects.
+- **Core / Use Cases**: Custom hooks (e.g., `useContent`, `useContentDetail`) that encapsulate business logic, state management, and side effects. Powered by SWR for caching and predictive prefetching.
 - **Infrastructure**: API services that handle HTTP communication with Cloudflare and AI endpoints.
 - **Presentation**: Purely visual Components and Views. They receive data from Use Cases and render it—they do not fetch data directly.
 

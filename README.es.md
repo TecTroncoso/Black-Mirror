@@ -58,8 +58,17 @@ graph TD
 
 El frontend de React aplica un patrón **Domain-Driven Design** ligero y escalable, resolviendo el clásico problema de "estado espagueti" común en aplicaciones React:
 
+```mermaid
+graph TD
+    A[Capa de Presentación<br/>Vistas y Componentes] -->|consume| B(Capa de Casos de Uso<br/>Hooks Personalizados)
+    B -->|invoca| C[Capa de Infraestructura<br/>Servicios API]
+    B -->|lee/escribe| D{Core / Dominio<br/>Modelos e Interfaces}
+    C -->|implementa| D
+    C -->|HTTP| E[API Cloudflare Workers]
+```
+
 - **Core / Domain**: Modelos e interfaces puras de TypeScript. Agnóstico del framework.
-- **Core / Use Cases**: Hooks personalizados (ej. `useContent`) que encapsulan la lógica de negocio, la gestión de estado y los efectos secundarios.
+- **Core / Use Cases**: Hooks personalizados (ej. `useContent`, `useContentDetail`) que encapsulan la lógica de negocio, la gestión de estado y los efectos secundarios. Potenciados por SWR para caché y prefetching predictivo.
 - **Infrastructure**: Servicios de API que manejan la comunicación HTTP con Cloudflare y endpoints de IA.
 - **Presentation**: Componentes y Vistas puramente visuales. Reciben datos de los Casos de Uso y los renderizan — no hacen fetch de datos directamente.
 
