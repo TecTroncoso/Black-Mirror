@@ -6,13 +6,14 @@ export class TursoContentRepository {
         this.db = dbClient;
     }
 
-    async findByType(contentType) {
+    async findByType(contentType, limit = 50, offset = 0) {
         const result = await this.db.execute({
             sql: `SELECT slug, title as titulo, poster as portada, total_episodes as capitulos_total
                   FROM content
                   WHERE content_type = ?
-                  ORDER BY title ASC`,
-            args: [contentType]
+                  ORDER BY title ASC
+                  LIMIT ? OFFSET ?`,
+            args: [contentType, limit, offset]
         });
 
         return result.rows.map(row => new ContentItem(

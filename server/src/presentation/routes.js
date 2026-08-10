@@ -40,12 +40,18 @@ export const createRouter = (userRepository, contentRepository) => {
     // ============================================================
     app.get('/api/content/:type', (c) => {
         const type = c.req.param('type');
-        return handleUseCase(c, () => contentUseCases.getContentListByType(type));
+        const page = parseInt(c.req.query('page')) || 1;
+        const limit = parseInt(c.req.query('limit')) || 50;
+        const offset = (page - 1) * limit;
+
+        c.header('Cache-Control', 'public, max-age=60'); // Edge Cache for 60 seconds
+        return handleUseCase(c, () => contentUseCases.getContentListByType(type, limit, offset));
     });
 
     app.get('/api/content/:type/:slug', (c) => {
         const type = c.req.param('type');
         const slug = c.req.param('slug');
+        c.header('Cache-Control', 'public, max-age=60'); // Edge Cache for 60 seconds
         return handleUseCase(c, () => contentUseCases.getContentDetail(slug, type));
     });
 

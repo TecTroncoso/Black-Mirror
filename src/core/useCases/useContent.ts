@@ -1,34 +1,42 @@
-import { useState, useEffect } from 'react';
+import useSWRInfinite from 'swr/infinite';
 import { ContentItem, ContentType } from '../domain/models';
 import { contentService } from '../../infrastructure/services/contentService';
 
+const PAGE_LIMIT = 50;
+
 export const useContent = (contentType: ContentType) => {
-    const [items, setItems] = useState<ContentItem[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    const getKey = (pageIndex: number, previousPageData: ContentItem[]) => {
+        // If it's the end, return null to stop fetching
+        if (previousPageData && !previousPageData.length) return null;
+        // Key contains the content type and the page number
+        return [contentType, pageIndex + 1];
+    };
 
-    useEffect(() => {
-        let mounted = true;
+    const fetcher = async ([type, page]: [ContentType, number]) => {
+        return await contentService.fetchContentList(type, page, PAGE_LIMIT);
+    };
 
-        const fetchContent = async () => {
-            setLoading(true);
-            setError(null);
-            try {
-                const data = await contentService.fetchContentList(contentType);
-                if (mounted) setItems(data);
-            } catch (err: any) {
-                if (mounted) setError(err.message || 'Unknown error occurred');
-            } finally {
-                if (mounted) setLoading(false);
-            }
-        };
+    const { data, error, size, setSize, isValidating } = useSWRInfinite(
+        getKey,
+        fetcher,
+        {
+            revalidateFirstPage: false, // Don't re-fetch the first page constantly if we have it in cache
+            persistSize: true, // Keep the size when component unmounts
+        }
+    );
 
-        fetchContent();
+    const items = data ? data.flat() : [];
+    const isLoadingInitialData = !data && !error;
+    const isLoadingMore = isLoadingInitialData || (size > 0 && data && typeof data[size - 1] === 'undefined');
+    const isEmpty = data?.[0]?.length === 0;
+    const isReachingEnd = isEmpty || (data && data[data.length - 1]?.length < PAGE_LIMIT);
 
-        return () => {
-            mounted = false;
-        };
-    }, [contentType]);
-
-    return { items, loading, error };
+    return { 
+        items, 
+        error: error ? error.message : null, 
+        isLoadingInitialData, 
+        isLoadingMore,
+        isReachingEnd,
+        loadMore: () => setSize(size + 1)
+    };
 };

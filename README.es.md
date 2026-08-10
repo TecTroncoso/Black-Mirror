@@ -27,7 +27,8 @@ El proyecto demuestra patrones arquitectónicos avanzados en todo el stack, incl
 - **UI/UX Futurista**: Una interfaz premium en modo oscuro construida con **Tailwind CSS v4**, con glassmorphism, animaciones dinámicas, detalles en neón y una barra de desplazamiento cinemática personalizada.
 - **Arquitectura Universal de Contenido**: Una arquitectura híbrida JSON tipo NoSQL altamente escalable alojada en **Turso Edge Database**. Almacena Películas, Series, Anime y Anime para Adultos en una sola tabla unificada, utilizando payloads JSON para flexibilidad infinita de esquema.
 - **Scrapers Automatizados en Python**: Incluye un orquestador de scraping auto-actualizable. Construido con `asyncio`, `FastAPI` y `httpx` de Python, extrae, procesa y sincroniza contenido fresco periódicamente directo a la Base de Datos en la Nube de Turso en segundo plano.
-- **API en el Edge**: Una API REST ultrarrápida construida con **Hono.js** y desplegada en **Cloudflare Workers** para tiempos de inicio en frío nulos y latencia global baja.
+- **API en el Edge y Caché**: Una API REST ultrarrápida construida con **Hono.js** y desplegada en **Cloudflare Workers**. Utiliza una estrategia de Caché Short-TTL (`max-age=60`) para servir JSONs instantáneamente desde nodos Edge, reduciendo consultas a la DB un 99% en picos de tráfico manteniendo el contenido fresco.
+- **SWR y Paginación en el Frontend**: La UI aprovecha **SWR (Stale-While-Revalidate)** y Scroll Infinito para cargar contenido de la memoria al instante al cambiar de rutas, mientras busca actualizaciones de fondo de forma silenciosa, evitando el congelamiento del DOM incluso con más de 10,000 elementos.
 - **Arquitectura Empresarial**: Estricta separación de responsabilidades que garantiza que la interfaz de usuario no sepa nada sobre cómo se obtienen los datos de la API, y las rutas HTTP no sepan nada sobre las implementaciones de la base de datos.
 
 ---

@@ -10,12 +10,12 @@ export class ContentUseCases {
         return validTypes.includes(type);
     }
 
-    async getContentListByType(contentType) {
+    async getContentListByType(contentType, limit = 50, offset = 0) {
         if (!this._isValidType(contentType)) {
             throw new ValidationError('Invalid content type');
         }
 
-        const items = await this.contentRepository.findByType(contentType);
+        const items = await this.contentRepository.findByType(contentType, limit, offset);
         return items.map(item => ({
             slug: item.slug,
             titulo: item.title,

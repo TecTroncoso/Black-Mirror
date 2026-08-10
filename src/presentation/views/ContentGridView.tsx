@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { ContentItem, ContentType } from '../../core/domain/models';
 import { useContent } from '../../core/useCases/useContent';
 import { Loader2, Play, Search } from 'lucide-react';
@@ -16,20 +16,39 @@ const CONTENT_LABELS: Record<ContentType, string> = {
 };
 
 export const ContentGridView: React.FC<ContentGridViewProps> = ({ contentType, title }) => {
-    const { items, loading, error } = useContent(contentType);
+    const { 
+        items, 
+        error, 
+        isLoadingInitialData, 
+        isLoadingMore, 
+        isReachingEnd, 
+        loadMore 
+    } = useContent(contentType);
+    
     const [searchQuery, setSearchQuery] = useState('');
+    const observer = useRef<IntersectionObserver | null>(null);
 
+    // Infinite scroll observer setup
+    const lastElementRef = useCallback((node: HTMLDivElement | null) => {
+        if (isLoadingMore) return;
+        if (observer.current) observer.current.disconnect();
+        
+        observer.current = new IntersectionObserver(entries => {
+            if (entries[0].isIntersecting && !isReachingEnd) {
+                loadMore();
+            }
+        }, {
+            rootMargin: '200px' // Load when 200px from the bottom
+        });
+        
+        if (node) observer.current.observe(node);
+    }, [isLoadingMore, isReachingEnd, loadMore]);
+
+    // Client side filtering. NOTE: With pagination, this only filters *currently loaded* items.
+    // Realistically, search should hit an API endpoint if the DB is massive.
     const filtered = items.filter(item =>
         item.titulo.toLowerCase().includes(searchQuery.toLowerCase())
     );
-
-    if (loading) {
-        return (
-            <div className="flex items-center justify-center h-64">
-                <Loader2 className="w-8 h-8 text-tv-focus animate-spin" />
-            </div>
-        );
-    }
 
     if (error) {
         return (
@@ -39,13 +58,21 @@ export const ContentGridView: React.FC<ContentGridViewProps> = ({ contentType, t
         );
     }
 
+    if (isLoadingInitialData) {
+        return (
+            <div className="flex items-center justify-center h-64">
+                <Loader2 className="w-8 h-8 text-tv-focus animate-spin" />
+            </div>
+        );
+    }
+
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 pb-20">
             {/* Header */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-2xl md:text-3xl font-bold text-white tracking-tight">{title}</h1>
-                    <p className="text-sm text-gray-400 mt-1">{items.length} titles available</p>
+                    <p className="text-sm text-gray-400 mt-1">{items.length} titles loaded</p>
                 </div>
                 {/* Search */}
                 <div className="relative w-full sm:w-72">
@@ -70,9 +97,20 @@ export const ContentGridView: React.FC<ContentGridViewProps> = ({ contentType, t
                 </div>
             ) : (
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-                    {filtered.map((item) => (
-                        <ContentCard key={item.slug} item={item} />
-                    ))}
+                    {filtered.map((item, index) => {
+                        // Attach observer ref to the last element in the grid
+                        if (index === filtered.length - 1) {
+                            return <div ref={lastElementRef} key={item.slug}><ContentCard item={item} /></div>;
+                        }
+                        return <ContentCard key={item.slug} item={item} />;
+                    })}
+                </div>
+            )}
+            
+            {/* Loading Indicator for Infinite Scroll */}
+            {isLoadingMore && !isLoadingInitialData && (
+                <div className="flex justify-center py-6">
+                    <Loader2 className="w-6 h-6 text-tv-focus animate-spin" />
                 </div>
             )}
         </div>
@@ -81,7 +119,7 @@ export const ContentGridView: React.FC<ContentGridViewProps> = ({ contentType, t
 
 const ContentCard: React.FC<{ item: ContentItem }> = ({ item }) => {
     return (
-        <button className="group relative flex flex-col rounded-2xl overflow-hidden bg-white/5 border border-white/5 hover:border-tv-focus/30 transition-all duration-300 hover:scale-[1.03] hover:shadow-[0_0_20px_rgba(59,130,246,0.15)] text-left">
+        <button className="group relative flex flex-col rounded-2xl overflow-hidden bg-white/5 border border-white/5 hover:border-tv-focus/30 transition-all duration-300 hover:scale-[1.03] hover:shadow-[0_0_20px_rgba(59,130,246,0.15)] text-left w-full">
             {/* Poster */}
             <div className="relative aspect-[2/3] w-full overflow-hidden">
                 {item.portada ? (
