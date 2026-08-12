@@ -142,17 +142,19 @@ npm run dev
 ```
 
 ### 2. Content Scrapers (Python)
+There are multiple independent scrapers available in the `Scraping/` directory. For example, to run the Adult Anime scraper (Hentaila) or the regular Anime scraper (AnimeAV1):
 ```bash
-cd Scraping/Hentaila
+cd Scraping/Hentaila # Or cd Scraping/Animeav1
 pip install -r requirements.txt
 ```
-Create a `.env` file inside `Scraping/Hentaila/`:
+Create a `.env` file inside the specific scraper directory:
 ```env
 TURSO_DATABASE_URL=libsql://your-db-url.turso.io
 TURSO_AUTH_TOKEN=your-token
 ```
 ```bash
 python api.py
+# The background scraping daemon will start and expose a health API on port 8000 (Hentaila) or 8001 (Animeav1)
 ```
 
 ### 3. Frontend (Vite)
