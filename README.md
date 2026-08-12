@@ -114,10 +114,14 @@ BlackMirror/
 │       ├── presentation/       # Hono HTTP routes
 │       └── index.js            # Composition Root (Dependency Injection)
 └── Scraping/                   # Python Scrapers
-    └── Hentaila/               # Automated Scraper
+    ├── Hentaila/               # Adult Anime Scraper (hentaila.com)
+    │   ├── api.py              # FastAPI orchestrator and background task
+    │   ├── database.py         # Direct Turso DB connection
+    │   └── hentaila_scraper.py # Web scraping logic (BeautifulSoup4)
+    └── Animeav1/               # Regular Anime Scraper (animeav1.com)
         ├── api.py              # FastAPI orchestrator and background task
         ├── database.py         # Direct Turso DB connection
-        └── hentaila_scraper.py # Web scraping logic (BeautifulSoup4)
+        └── animeav1_scraper.py # Async scraper (httpx + tenacity + SvelteKit)
 ```
 
 ---
