@@ -25,7 +25,10 @@ export const useContent = (contentType: ContentType) => {
         }
     );
 
-    const items = data ? data.flat() : [];
+    // Deduplicate by slug to prevent repeated items across pages
+    const items = data 
+        ? [...new Map(data.flat().map(item => [item.slug, item])).values()] 
+        : [];
     const isLoadingInitialData = !data && !error;
     const isLoadingMore = isLoadingInitialData || (size > 0 && data && typeof data[size - 1] === 'undefined');
     const isEmpty = data?.[0]?.length === 0;

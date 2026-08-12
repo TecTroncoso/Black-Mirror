@@ -33,7 +33,7 @@ export const ContentGridView: React.FC<ContentGridViewProps> = ({ contentType, t
 
     // Infinite scroll observer setup
     const lastElementRef = useCallback((node: HTMLDivElement | null) => {
-        if (isLoadingMore) return;
+        if (isLoadingMore || searchQuery) return;
         if (observer.current) observer.current.disconnect();
         
         observer.current = new IntersectionObserver(entries => {
@@ -45,7 +45,7 @@ export const ContentGridView: React.FC<ContentGridViewProps> = ({ contentType, t
         });
         
         if (node) observer.current.observe(node);
-    }, [isLoadingMore, isReachingEnd, loadMore]);
+    }, [isLoadingMore, isReachingEnd, loadMore, searchQuery]);
 
     // Client side filtering. NOTE: With pagination, this only filters *currently loaded* items.
     // Realistically, search should hit an API endpoint if the DB is massive.
