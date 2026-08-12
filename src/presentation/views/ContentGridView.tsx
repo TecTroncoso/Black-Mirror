@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState } from 'react';
 import { preload } from 'swr';
 import { ContentItem, ContentType } from '../../core/domain/models';
 import { useContent } from '../../core/useCases/useContent';
@@ -19,36 +19,10 @@ const CONTENT_LABELS: Record<ContentType, string> = {
 };
 
 export const ContentGridView: React.FC<ContentGridViewProps> = ({ contentType, title, onContentSelect }) => {
-    const { 
-        items, 
-        error, 
-        isLoadingInitialData, 
-        isLoadingMore, 
-        isReachingEnd, 
-        loadMore 
-    } = useContent(contentType);
-    
+    const { items, error, isLoading } = useContent(contentType);
     const [searchQuery, setSearchQuery] = useState('');
-    const observer = useRef<IntersectionObserver | null>(null);
 
-    // Infinite scroll observer setup
-    const lastElementRef = useCallback((node: HTMLDivElement | null) => {
-        if (isLoadingMore || searchQuery) return;
-        if (observer.current) observer.current.disconnect();
-        
-        observer.current = new IntersectionObserver(entries => {
-            if (entries[0].isIntersecting && !isReachingEnd) {
-                loadMore();
-            }
-        }, {
-            rootMargin: '200px' // Load when 200px from the bottom
-        });
-        
-        if (node) observer.current.observe(node);
-    }, [isLoadingMore, isReachingEnd, loadMore, searchQuery]);
-
-    // Client side filtering. NOTE: With pagination, this only filters *currently loaded* items.
-    // Realistically, search should hit an API endpoint if the DB is massive.
+    // Client-side filtering on the full dataset
     const filtered = items.filter(item =>
         item.titulo.toLowerCase().includes(searchQuery.toLowerCase())
     );
@@ -61,7 +35,7 @@ export const ContentGridView: React.FC<ContentGridViewProps> = ({ contentType, t
         );
     }
 
-    if (isLoadingInitialData) {
+    if (isLoading) {
         return (
             <div className="flex items-center justify-center h-64">
                 <Loader2 className="w-8 h-8 text-tv-focus animate-spin" />
@@ -100,22 +74,9 @@ export const ContentGridView: React.FC<ContentGridViewProps> = ({ contentType, t
                 </div>
             ) : (
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-                    {filtered.map((item, index) => {
-                        // Attach observer ref to the last element in the grid
-                        if (index === filtered.length - 1) {
-                            return <div ref={lastElementRef} key={item.slug}>
-                                <ContentCard item={item} contentType={contentType} onClick={() => onContentSelect?.(item.slug)} />
-                            </div>;
-                        }
-                        return <ContentCard key={item.slug} item={item} contentType={contentType} onClick={() => onContentSelect?.(item.slug)} />;
-                    })}
-                </div>
-            )}
-            
-            {/* Loading Indicator for Infinite Scroll */}
-            {isLoadingMore && !isLoadingInitialData && (
-                <div className="flex justify-center py-6">
-                    <Loader2 className="w-6 h-6 text-tv-focus animate-spin" />
+                    {filtered.map((item) => (
+                        <ContentCard key={item.slug} item={item} contentType={contentType} onClick={() => onContentSelect?.(item.slug)} />
+                    ))}
                 </div>
             )}
         </div>
