@@ -35,16 +35,6 @@ export class ContentUseCases {
             throw new NotFoundError("Content not found");
         }
 
-        // If content is 'anime', hide 'hls' provider for now
-        let processedDetails = detail.details;
-        if (contentType === 'anime' && processedDetails && processedDetails.capitulos) {
-            processedDetails.capitulos = processedDetails.capitulos.map(cap => ({
-                ...cap,
-                proveedores: cap.proveedores ? cap.proveedores.filter(p => p.nombre.toLowerCase() !== 'hls') : [],
-                descargas: cap.descargas ? cap.descargas.filter(p => p.nombre.toLowerCase() !== 'hls') : []
-            }));
-        }
-
         // Return a fully constructed object containing all details
         return {
             slug: detail.slug,
@@ -52,7 +42,7 @@ export class ContentUseCases {
             titulo: detail.title,
             portada: detail.poster,
             capitulos_total: detail.totalEpisodes,
-            ...processedDetails // Spread dynamic JSON details
+            ...detail.details // Spread dynamic JSON details
         };
     }
 }
