@@ -5,16 +5,20 @@ from fastapi import FastAPI, HTTPException
 import uvicorn
 
 from database import init_db, count_animes, get_all_animes_basic
-from animeav1_scraper import run_full_and_watch_async, parse_args
+from animeav1_scraper import run_full_and_watch_async, parse_args, setup_logging, LOG_FILE
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # Configurar logging ANTES de lanzar el scraper. Sin esto, los loggers
+    # `animeav1.*` no tienen handler y Python descarta los mensajes INFO.
+    setup_logging(LOG_FILE, level=logging.INFO)
+
     # Inicializar base de datos de Turso
     await init_db()
-    
+
     # Preparamos los argumentos por defecto (full-and-watch)
     args = parse_args([])
-    
+
     logging.getLogger("animeav1.api").info("Arrancando el scraper AnimeAV1 en segundo plano...")
     # Lanzar la tarea principal del scraper (raspado completo + watcher)
     task = asyncio.create_task(run_full_and_watch_async(args))
